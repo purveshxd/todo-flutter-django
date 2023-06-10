@@ -16,14 +16,7 @@ final postTaskProvider = FutureProvider.family<dynamic, Todo>((ref, todo) {
 final tasktoggeleProvider = FutureProvider.family<dynamic, int>((ref, id) {
   return TodoApi().taskdoneTodo(id);
 });
+
 final checkBoxStateProvider = StateProvider.family<bool?, int?>((ref, index) {
   return ref.watch(taskListProvider).value!.elementAt(index!).isDone;
-});
-
-final doneTaskProvider = Provider((ref) {
-  return ref
-      .watch(taskListProvider)
-      .value
-      ?.where((element) => element.isDone == true)
-      .toList();
 });

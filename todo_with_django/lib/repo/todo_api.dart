@@ -17,7 +17,7 @@ class TodoApi {
       taskList = todoFromJson(resp.body);
       debugPrint(taskList.toString());
 
-      return taskList;
+      return taskList.reversed.toList();
     } else {
       throw Exception(resp.reasonPhrase! + resp.statusCode.toString());
     }
@@ -28,9 +28,7 @@ class TodoApi {
     try {
       Response resp = await http.post(
         Uri.parse(url),
-        body: jsonEncode(
-          todo
-        ),
+        body: jsonEncode(todo),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

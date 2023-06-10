@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:todo_with_django/repo/todo_model.dart';
 import 'package:todo_with_django/repo/todo_provider.dart';
 import 'package:todo_with_django/widget/custom_text_field.dart';
@@ -10,10 +11,13 @@ class Homepage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
+    ScrollController scrollController = ScrollController();
     TextEditingController titleController = TextEditingController();
     TextEditingController descController = TextEditingController();
     final taskList = ref.watch(taskListProvider);
     Future _onRefresh() async {
+      scrollController.animateTo(0,
+          duration: const Duration(milliseconds: 1), curve: Curves.linear);
       return Future.delayed(const Duration(seconds: 1))
           .then((value) => ref.refresh(taskListProvider));
     }
@@ -66,24 +70,45 @@ class Homepage extends ConsumerWidget {
       ),
       body: taskList.when(
         data: (data) {
-          var reversedData = data.reversed;
           return RefreshIndicator(
             onRefresh: _onRefresh,
             child: ListView.builder(
-              itemCount: reversedData.length,
+              controller: scrollController,
+              itemCount: data.length,
               itemBuilder: (context, index) {
-                return TaskTile(
-                  todo: reversedData.elementAt(index),
-                  onChanged: (value) {
-                    reversedData.elementAt(index).isDone = value;
-                    ref
-                        .read(checkBoxStateProvider.call(index).notifier)
-                        .update((state) => value!);
-                    ref
-                        .read(todoApiProvider)
-                        .taskdoneTodo(reversedData.elementAt(index).id);
-                  },
-                  value: ref.watch(checkBoxStateProvider.call(index)),
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8),
+                  child: Slidable(
+                      endActionPane:
+                          ActionPane(motion: const StretchMotion(), children: [
+                        SlidableAction(
+                          icon: Icons.delete,
+                          backgroundColor: Colors.red.shade400,
+                          borderRadius: BorderRadius.circular(15),
+                          // spacing: 5,
+                          onPressed: (context) {
+                            ref.read(
+                              deleteTaskProvider
+                                  .call(data.elementAt(index).id!),
+                            );
+                            _onRefresh();
+                          },
+                        )
+                      ]),
+                      child: TaskTile(
+                        todo: data.elementAt(index),
+                        onChanged: (value) {
+                          // reversedData.elementAt(index).isDone = value;
+                          ref
+                              .read(checkBoxStateProvider.call(index).notifier)
+                              .update((state) => value!);
+
+                          ref.read(tasktoggeleProvider
+                              .call(data.elementAt(index).id!));
+                        },
+                        value: ref.watch(checkBoxStateProvider.call(index)),
+                      )),
                 );
               },
             ),

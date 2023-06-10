@@ -11,6 +11,7 @@ class CustomTextField extends StatelessWidget {
   }) : super(key: key);
 
   final TextEditingController controller;
+
   final int index;
 
   @override
@@ -18,6 +19,7 @@ class CustomTextField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: TextField(
+        textInputAction: TextInputAction.next,
         decoration: InputDecoration(
           hintText: Constants().labels.elementAt(index),
           label: Text(Constants().labels.elementAt(index)),
